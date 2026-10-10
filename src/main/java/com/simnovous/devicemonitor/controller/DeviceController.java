@@ -1,3 +1,4 @@
+
 package com.simnovous.devicemonitor.controller;
 
 import com.simnovous.devicemonitor.dto.ApiResponse;
@@ -19,22 +20,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/devices")
 @Slf4j
 public class DeviceController {
 
     private final DeviceService deviceService;
 
-    @PostMapping
+    @PostMapping("/devices")
     @ResponseStatus(HttpStatus.CREATED)
     public Device registerDevice(
             @Valid @RequestBody RegisterDeviceRequest request) {
+
         log.info("Registering device with id={}", request.getId());
 
         Device device = deviceService.registerDevice(request);
@@ -44,12 +44,13 @@ public class DeviceController {
         return device;
     }
 
-    @GetMapping("/test")
+    @GetMapping("/devices/test")
     public int getResponse() {
+        log.debug("Received request for /devices/test");
         return deviceService.getResponse();
     }
 
-    @PostMapping("/{id}/heartbeat")
+    @PostMapping("/devices/{id}/heartbeat")
     public ApiResponse<DeviceResponse> receiveHeartbeat(
             @PathVariable String id,
             @Valid @RequestBody HeartbeatRequest request) {
@@ -64,7 +65,7 @@ public class DeviceController {
                 response);
     }
 
-    @GetMapping({ "", "/{id}" })
+    @GetMapping({ "/devices", "/devices/{id}" })
     public ApiResponse<?> getDevices(
             @PathVariable(required = false) String id) {
 
