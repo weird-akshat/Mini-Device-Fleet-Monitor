@@ -19,17 +19,12 @@ public class Device {
 
     @Id
     private String id;
-
     @Column(nullable = false)
     private String name;
-
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
-
     private Instant lastHeartbeat;
-
     private Double cpuUsage;
-
     private Integer signalStrength;
 
     public Device(String id, String name, Instant createdAt) {

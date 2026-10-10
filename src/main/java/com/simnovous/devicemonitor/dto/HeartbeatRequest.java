@@ -1,3 +1,4 @@
+
 package com.simnovous.devicemonitor.dto;
 
 import com.simnovous.devicemonitor.model.DeviceReportedStatus;
@@ -7,14 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
-
 @Getter
 @Setter
 @NoArgsConstructor
 public class HeartbeatRequest {
-
-    private Instant timestamp;
 
     private DeviceReportedStatus status;
 

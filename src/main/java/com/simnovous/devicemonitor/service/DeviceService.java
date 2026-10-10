@@ -1,18 +1,27 @@
 package com.simnovous.devicemonitor.service;
 
 import org.springframework.util.StringUtils;
+
+import java.time.Instant;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.simnovous.devicemonitor.dto.DeviceResponse;
+import com.simnovous.devicemonitor.dto.HeartbeatRequest;
 import com.simnovous.devicemonitor.dto.RegisterDeviceRequest;
 import com.simnovous.devicemonitor.entity.Device;
 import com.simnovous.devicemonitor.exception.DeviceAlreadyExistsException;
 import com.simnovous.devicemonitor.exception.InvalidDeviceRequestException;
+import com.simnovous.devicemonitor.exception.DeviceNotFoundException;
 import com.simnovous.devicemonitor.mapper.DeviceMapper;
+import com.simnovous.devicemonitor.model.DeviceReportedStatus;
 import com.simnovous.devicemonitor.repository.DeviceRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DeviceService {
@@ -34,6 +43,44 @@ public class DeviceService {
         }
         Device device = deviceMapper.toEntity(request);
         return deviceRepository.save(device);
+    }
+
+    @Transactional
+    public DeviceResponse receiveHeartbeat(
+            String deviceId,
+            HeartbeatRequest request) {
+
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> {
+                    log.warn("Heartbeat received for unknown deviceId={}", deviceId);
+                    return new DeviceNotFoundException(
+                            "Device not found: " + deviceId);
+                });
+
+        if (request.getStatus() != DeviceReportedStatus.OK) {
+            log.warn(
+                    "Ignoring heartbeat for deviceId={} due to status={}",
+                    deviceId,
+                    request.getStatus());
+
+            return deviceMapper.toResponse(device);
+        }
+
+        device.setLastHeartbeat(Instant.now());
+
+        if (request.getCpuUsage() != null) {
+            device.setCpuUsage(request.getCpuUsage());
+        }
+
+        if (request.getSignalStrength() != null) {
+            device.setSignalStrength(request.getSignalStrength());
+        }
+
+        Device savedDevice = deviceRepository.save(device);
+
+        log.info("Heartbeat accepted for deviceId={}", deviceId);
+
+        return deviceMapper.toResponse(savedDevice);
     }
 
     public int getResponse() {

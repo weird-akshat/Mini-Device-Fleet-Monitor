@@ -1,14 +1,19 @@
 package com.simnovous.devicemonitor.controller;
 
+import com.simnovous.devicemonitor.dto.ApiResponse;
+import com.simnovous.devicemonitor.dto.DeviceResponse;
+import com.simnovous.devicemonitor.dto.HeartbeatRequest;
 import com.simnovous.devicemonitor.dto.RegisterDeviceRequest;
 import com.simnovous.devicemonitor.entity.Device;
 import com.simnovous.devicemonitor.service.DeviceService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/devices")
+@Slf4j
 public class DeviceController {
 
     private final DeviceService deviceService;
@@ -32,5 +38,20 @@ public class DeviceController {
     @GetMapping("/test")
     public int getResponse() {
         return deviceService.getResponse();
+    }
+
+    @PostMapping("/{id}/heartbeat")
+    public ApiResponse<DeviceResponse> receiveHeartbeat(
+            @PathVariable String id,
+            @Valid @RequestBody HeartbeatRequest request) {
+
+        log.debug("Received heartbeat request for deviceId={}", id);
+
+        DeviceResponse response = deviceService.receiveHeartbeat(id, request);
+
+        return new ApiResponse<>(
+                true,
+                "Heartbeat processed",
+                response);
     }
 }
