@@ -3,6 +3,7 @@ package com.simnovous.devicemonitor.service;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +82,31 @@ public class DeviceService {
         log.info("Heartbeat accepted for deviceId={}", deviceId);
 
         return deviceMapper.toResponse(savedDevice);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeviceResponse> getAllDevices() {
+        List<Device> devices = deviceRepository.findAll();
+
+        log.debug("Retrieved {} devices", devices.size());
+
+        return devices.stream()
+                .map(deviceMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DeviceResponse getDeviceById(String deviceId) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> {
+                    log.warn("Device not found: deviceId={}", deviceId);
+                    return new DeviceNotFoundException(
+                            "Device not found: " + deviceId);
+                });
+
+        log.debug("Retrieved deviceId={}", deviceId);
+
+        return deviceMapper.toResponse(device);
     }
 
     public int getResponse() {

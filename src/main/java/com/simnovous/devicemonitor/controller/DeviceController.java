@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,4 +56,26 @@ public class DeviceController {
                 "Heartbeat processed",
                 response);
     }
+
+    @GetMapping({ "", "/{id}" })
+    public ApiResponse<?> getDevices(
+            @PathVariable(required = false) String id) {
+
+        if (id != null) {
+            DeviceResponse device = deviceService.getDeviceById(id);
+
+            return new ApiResponse<>(
+                    true,
+                    "Device retrieved successfully",
+                    device);
+        }
+
+        List<DeviceResponse> devices = deviceService.getAllDevices();
+
+        return new ApiResponse<>(
+                true,
+                "Devices retrieved successfully",
+                devices);
+    }
+
 }
