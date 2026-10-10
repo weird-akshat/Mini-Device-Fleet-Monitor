@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.simnovous.devicemonitor.dto.DeviceResponse;
+import com.simnovous.devicemonitor.dto.FleetSummaryResponse;
 import com.simnovous.devicemonitor.dto.HeartbeatRequest;
 import com.simnovous.devicemonitor.dto.RegisterDeviceRequest;
 import com.simnovous.devicemonitor.entity.Device;
@@ -32,18 +33,32 @@ public class DeviceService {
 
     @Transactional
     public Device registerDevice(RegisterDeviceRequest request) {
+        log.info("Registering device with id={}", request.getId());
+
         if (!StringUtils.hasText(request.getId())) {
+            log.warn("Device registration failed: device ID is missing");
             throw new InvalidDeviceRequestException("Device ID is required");
         }
+
         if (!StringUtils.hasText(request.getName())) {
+            log.warn("Device registration failed: device name is missing for id={}",
+                    request.getId());
             throw new InvalidDeviceRequestException("Device name is required");
         }
+
         if (deviceRepository.existsById(request.getId())) {
+            log.warn("Device registration rejected: id={} already exists",
+                    request.getId());
             throw new DeviceAlreadyExistsException(
                     "Device already exists with ID: " + request.getId());
         }
+
         Device device = deviceMapper.toEntity(request);
-        return deviceRepository.save(device);
+        Device savedDevice = deviceRepository.save(device);
+
+        log.info("Device registered successfully with id={}", savedDevice.getId());
+
+        return savedDevice;
     }
 
     @Transactional
@@ -107,6 +122,33 @@ public class DeviceService {
         log.debug("Retrieved deviceId={}", deviceId);
 
         return deviceMapper.toResponse(device);
+    }
+
+    @Transactional(readOnly = true)
+    public FleetSummaryResponse getFleetSummary() {
+        var devices = deviceRepository.findAll();
+
+        Instant cutoff = Instant.now().minusSeconds(30);
+
+        long totalDevices = devices.size();
+
+        long onlineDevices = devices.stream()
+                .filter(device -> device.getLastHeartbeat() != null
+                        && device.getLastHeartbeat().isAfter(cutoff))
+                .count();
+
+        long offlineDevices = totalDevices - onlineDevices;
+
+        log.info(
+                "Fleet summary: total={}, online={}, offline={}",
+                totalDevices,
+                onlineDevices,
+                offlineDevices);
+
+        return new FleetSummaryResponse(
+                totalDevices,
+                onlineDevices,
+                offlineDevices);
     }
 
     public int getResponse() {

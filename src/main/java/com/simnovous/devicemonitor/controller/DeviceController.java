@@ -2,6 +2,7 @@ package com.simnovous.devicemonitor.controller;
 
 import com.simnovous.devicemonitor.dto.ApiResponse;
 import com.simnovous.devicemonitor.dto.DeviceResponse;
+import com.simnovous.devicemonitor.dto.FleetSummaryResponse;
 import com.simnovous.devicemonitor.dto.HeartbeatRequest;
 import com.simnovous.devicemonitor.dto.RegisterDeviceRequest;
 import com.simnovous.devicemonitor.entity.Device;
@@ -34,7 +35,13 @@ public class DeviceController {
     @ResponseStatus(HttpStatus.CREATED)
     public Device registerDevice(
             @Valid @RequestBody RegisterDeviceRequest request) {
-        return deviceService.registerDevice(request);
+        log.info("Registering device with id={}", request.getId());
+
+        Device device = deviceService.registerDevice(request);
+
+        log.info("Device registered successfully with id={}", device.getId());
+
+        return device;
     }
 
     @GetMapping("/test")
@@ -78,4 +85,15 @@ public class DeviceController {
                 devices);
     }
 
+    @GetMapping("/summary")
+    public ApiResponse<FleetSummaryResponse> getFleetSummary() {
+        log.debug("Fetching fleet summary");
+
+        FleetSummaryResponse summary = deviceService.getFleetSummary();
+
+        return new ApiResponse<>(
+                true,
+                "Fleet summary retrieved successfully",
+                summary);
+    }
 }
