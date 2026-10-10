@@ -86,7 +86,7 @@ The current development configuration uses Hibernate schema auto-update. For a p
 Clone the repository and enter its directory:
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone git@github.com:weird-akshat/Mini-Device-Fleet-Monitor.git
 cd devicemonitor
 ```
 
