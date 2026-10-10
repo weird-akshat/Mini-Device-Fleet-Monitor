@@ -59,18 +59,9 @@ public class DeviceController {
                 response);
     }
 
-    @GetMapping({ "/devices", "/devices/{id}" })
-    public ApiResponse<?> getDevices(
-            @PathVariable(required = false) String id) {
-
-        if (id != null) {
-            DeviceResponse device = deviceService.getDeviceById(id);
-
-            return new ApiResponse<>(
-                    true,
-                    "Device retrieved successfully",
-                    device);
-        }
+    @GetMapping("/devices")
+    public ApiResponse<List<DeviceResponse>> getAllDevices() {
+        log.debug("Fetching all devices");
 
         List<DeviceResponse> devices = deviceService.getAllDevices();
 
@@ -78,6 +69,20 @@ public class DeviceController {
                 true,
                 "Devices retrieved successfully",
                 devices);
+    }
+
+    @GetMapping("/devices/{id}")
+    public ApiResponse<DeviceResponse> getDeviceById(
+            @PathVariable String id) {
+
+        log.debug("Fetching device with id={}", id);
+
+        DeviceResponse device = deviceService.getDeviceById(id);
+
+        return new ApiResponse<>(
+                true,
+                "Device retrieved successfully",
+                device);
     }
 
     @GetMapping("/summary")

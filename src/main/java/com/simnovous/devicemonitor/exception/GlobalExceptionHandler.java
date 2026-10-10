@@ -19,6 +19,14 @@ public class GlobalExceptionHandler {
                 .body(new ApiResponse<>(false, ex.getMessage(), null));
     }
 
+    @ExceptionHandler(DeviceNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDeviceNotFound(
+            DeviceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
     @ExceptionHandler(InvalidDeviceRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidDeviceRequest(
             InvalidDeviceRequestException ex) {
