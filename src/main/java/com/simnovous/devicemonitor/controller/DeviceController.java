@@ -44,12 +44,6 @@ public class DeviceController {
         return device;
     }
 
-    @GetMapping("/devices/test")
-    public int getResponse() {
-        log.debug("Received request for /devices/test");
-        return deviceService.getResponse();
-    }
-
     @PostMapping("/devices/{id}/heartbeat")
     public ApiResponse<DeviceResponse> receiveHeartbeat(
             @PathVariable String id,

@@ -150,8 +150,4 @@ public class DeviceService {
                 onlineDevices,
                 offlineDevices);
     }
-
-    public int getResponse() {
-        return 0;
-    }
 }
